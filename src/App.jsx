@@ -5,7 +5,7 @@ import { Outlet } from "react-router-dom";
 // import { useDispatch } from "react-redux";
 // import { retrieveAuth } from "./features/auth";
 import "./App.css";
-import Navbar from "./components/NavBar";
+import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import { useDispatch } from "react-redux";
 import { retriveAuth } from "./features/auth";
