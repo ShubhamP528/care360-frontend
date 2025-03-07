@@ -9,6 +9,7 @@ const SignupForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [userType, setUserType] = useState("patient"); // Default to 'patient'
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -64,52 +65,60 @@ const SignupForm = () => {
     e.preventDefault();
     console.log("Form submitted:", formData);
     try {
-      const FetchLogin = await fetch(`${NODE_API_ENDPOINT}/auth/register`, {
+      setLoading(true);
+      const FetchSignup = await fetch(`${NODE_API_ENDPOINT}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ ...formData, role: userType }),
       });
-      if (!FetchLogin.ok) {
-        throw new Error(
-          "Failed to registering. Please check your credentials."
-        );
+      if (!FetchSignup.ok) {
+        throw new Error("Failed to register. Please check your credentials.");
       }
-      const responseData = await FetchLogin.json();
+      const responseData = await FetchSignup.json();
       console.log("Registered successfully:", responseData);
       dispatch(login({ token: responseData.token, user: responseData.user }));
       navigate("/dashboard");
       toast.success("Registered successfully");
     } catch (error) {
-      console.error("Error logging in:", error);
-      // Display an error message to the user
-      toast.error("Failed to registering. Please check your credentials.");
+      console.error("Error registering:", error);
+      toast.error("Failed to register. Please check your credentials.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className=" mx-auto p-6  rounded-lg shadow-xl  border border-gray-300 bg-teal-100">
+    <div className="max-w-lg mx-auto p-6 rounded-lg shadow-xl border border-gray-300 bg-teal-100">
       <div className="mx-auto p-8 rounded-xl bg-white">
         <h2 className="text-2xl font-bold text-center mb-4 text-teal-500">
           Sign Up
         </h2>
 
         {/* Role Selection (Doctor or Patient) */}
-        <div className="flex justify-center mb-6 cursor-pointer">
+        <div className="flex justify-center mb-6">
           <button
-            className={`cursor-pointer px-4 py-2 rounded-l-md ${
-              userType === "patient" ? "bg-teal-500 text-white" : "bg-gray-200"
-            }`}
+            type="button"
+            disabled={loading}
             onClick={() => setUserType("patient")}
+            className={`px-4 py-2 rounded-l-md ${
+              userType === "patient"
+                ? "bg-teal-500 text-white"
+                : "bg-gray-200 text-gray-700"
+            }`}
           >
             Patient
           </button>
           <button
-            className={`cursor-pointer px-4 py-2 rounded-r-md ${
-              userType === "doctor" ? "bg-teal-500 text-white" : "bg-gray-200"
-            }`}
+            type="button"
+            disabled={loading}
             onClick={() => setUserType("doctor")}
+            className={`px-4 py-2 rounded-r-md ${
+              userType === "doctor"
+                ? "bg-teal-500 text-white"
+                : "bg-gray-200 text-gray-700"
+            }`}
           >
             Doctor
           </button>
@@ -130,6 +139,7 @@ const SignupForm = () => {
               value={formData.email}
               onChange={handleInputChange}
               required
+              disabled={loading}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
             />
           </div>
@@ -147,6 +157,7 @@ const SignupForm = () => {
               value={formData.password}
               onChange={handleInputChange}
               required
+              disabled={loading}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
             />
           </div>
@@ -164,6 +175,7 @@ const SignupForm = () => {
               value={formData.firstName}
               onChange={handleInputChange}
               required
+              disabled={loading}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
             />
           </div>
@@ -181,6 +193,7 @@ const SignupForm = () => {
               value={formData.lastName}
               onChange={handleInputChange}
               required
+              disabled={loading}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
             />
           </div>
@@ -201,6 +214,7 @@ const SignupForm = () => {
                   value={formData.dateOfBirth}
                   onChange={handleInputChange}
                   required
+                  disabled={loading}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
@@ -218,6 +232,7 @@ const SignupForm = () => {
                   value={formData.phone}
                   onChange={handleInputChange}
                   required
+                  disabled={loading}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
@@ -235,6 +250,7 @@ const SignupForm = () => {
                   value={formData.address.street}
                   onChange={handleInputChange}
                   required
+                  disabled={loading}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
@@ -252,6 +268,7 @@ const SignupForm = () => {
                   value={formData.address.city}
                   onChange={handleInputChange}
                   required
+                  disabled={loading}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
@@ -269,6 +286,7 @@ const SignupForm = () => {
                   value={formData.address.state}
                   onChange={handleInputChange}
                   required
+                  disabled={loading}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
@@ -286,6 +304,7 @@ const SignupForm = () => {
                   value={formData.address.zipCode}
                   onChange={handleInputChange}
                   required
+                  disabled={loading}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
@@ -308,6 +327,7 @@ const SignupForm = () => {
                   value={formData.specialty}
                   onChange={handleInputChange}
                   required
+                  disabled={loading}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
@@ -325,6 +345,7 @@ const SignupForm = () => {
                   value={formData.experience}
                   onChange={handleInputChange}
                   required
+                  disabled={loading}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
@@ -341,6 +362,7 @@ const SignupForm = () => {
                   value={formData.bio}
                   onChange={handleInputChange}
                   required
+                  disabled={loading}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
@@ -358,6 +380,7 @@ const SignupForm = () => {
                   value={formData.consultationFee}
                   onChange={handleInputChange}
                   required
+                  disabled={loading}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
@@ -376,6 +399,7 @@ const SignupForm = () => {
                   placeholder="Consultation Location Name"
                   value={formData.consultationLocations[0]?.name || ""}
                   onChange={handleInputChange}
+                  disabled={loading}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
                 <input
@@ -384,18 +408,45 @@ const SignupForm = () => {
                   placeholder="Consultation Location Address"
                   value={formData.consultationLocations[0]?.address || ""}
                   onChange={handleInputChange}
+                  disabled={loading}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
-                {/* Additional locations can be added dynamically */}
               </div>
             </>
           )}
 
           <button
             type="submit"
-            className="cursor-pointer w-full bg-teal-500 text-white py-2 rounded-md hover:bg-teal-600 transition duration-300"
+            disabled={loading}
+            className="cursor-pointer w-full bg-teal-500 text-white py-2 rounded-md hover:bg-teal-600 transition duration-300 flex items-center justify-center"
           >
-            Sign Up
+            {loading ? (
+              <>
+                <svg
+                  className="animate-spin h-5 w-5 mr-2 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  ></path>
+                </svg>
+                Signing Up...
+              </>
+            ) : (
+              "Sign Up"
+            )}
           </button>
           {/* Login Link */}
           <div className="mt-6 text-center">

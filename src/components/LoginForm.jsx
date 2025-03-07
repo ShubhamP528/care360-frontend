@@ -12,6 +12,7 @@ const LoginForm = () => {
     email: "",
     password: "",
   });
+  const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -23,6 +24,7 @@ const LoginForm = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
     console.log("Form submitted:", formData);
     try {
       const FetchLogin = await fetch(`${NODE_API_ENDPOINT}/auth/login`, {
@@ -42,8 +44,9 @@ const LoginForm = () => {
       toast.success("Logged in successfully");
     } catch (error) {
       console.error("Error logging in:", error);
-      // Display an error message to the user
       toast.error("Failed to log in. Please check your credentials.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,6 +72,7 @@ const LoginForm = () => {
               value={formData.email}
               onChange={handleInputChange}
               required
+              disabled={loading}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
             />
           </div>
@@ -87,6 +91,7 @@ const LoginForm = () => {
               value={formData.password}
               onChange={handleInputChange}
               required
+              disabled={loading}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
             />
           </div>
@@ -94,9 +99,36 @@ const LoginForm = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full cursor-pointer bg-teal-500 text-white py-2 rounded-md hover:bg-teal-600 transition duration-300"
+            disabled={loading}
+            className="w-full flex items-center justify-center cursor-pointer bg-teal-500 text-white py-2 rounded-md hover:bg-teal-600 transition duration-300"
           >
-            Log In
+            {loading ? (
+              <>
+                <svg
+                  className="animate-spin h-5 w-5 mr-2 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  ></path>
+                </svg>
+                Logging In...
+              </>
+            ) : (
+              "Log In"
+            )}
           </button>
         </form>
 
@@ -104,7 +136,7 @@ const LoginForm = () => {
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">Don't have an account?</p>
           <Link
-            to="/register" // Replace with actual registration route
+            to="/register"
             className="text-teal-500 hover:text-teal-600 font-semibold"
           >
             Register here

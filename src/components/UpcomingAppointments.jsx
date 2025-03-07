@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { NODE_API_ENDPOINT } from "../utils/utils"; // Replace with actual endpoint
-import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+
+// Reusable Loader Component
+const Loader = () => (
+  <div className="flex justify-center items-center py-8">
+    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+);
 
 const UpcomingAppointments = () => {
   const [appointments, setAppointments] = useState([]);
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
   const user = useSelector((state) => state.auth.user);
-
-  console.log(user);
 
   useEffect(() => {
     const getUpcomingAppointments = async () => {
@@ -19,10 +23,10 @@ const UpcomingAppointments = () => {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user?.token}`, // Replace with actual token
+              Authorization: `Bearer ${user?.token}`,
             },
           }
-        ); // Replace with actual API endpoint
+        );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -32,14 +36,16 @@ const UpcomingAppointments = () => {
         }
       } catch (error) {
         console.error("Error fetching upcoming appointments", error);
+      } finally {
+        setLoading(false);
       }
     };
     if (user?.token) getUpcomingAppointments();
   }, [user?.token]);
 
-  const handleAppointmentDetails = (appointmentId) => {
-    navigate(`/doctor/appointments/${appointmentId}`);
-  };
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -53,7 +59,7 @@ const UpcomingAppointments = () => {
           appointments.map((appointment) => (
             <div
               key={appointment._id}
-              className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow"
+              className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
             >
               <h3 className="text-2xl font-semibold mb-2">
                 Patient: {appointment.patient.user.firstName}{" "}
@@ -62,7 +68,6 @@ const UpcomingAppointments = () => {
               <p className="text-sm font-medium text-gray-600 mb-1">
                 <strong>Reason for Visit:</strong> {appointment.reason}
               </p>
-
               <p className="text-gray-600 text-sm mb-1">
                 <strong>Date:</strong>{" "}
                 {new Date(appointment.date).toLocaleDateString()}

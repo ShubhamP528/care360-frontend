@@ -1,18 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { NODE_API_ENDPOINT } from "../utils/utils"; // You can replace this with the actual API endpoint if needed
+import { NODE_API_ENDPOINT } from "../utils/utils";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+
+// Reusable Loader Component
+const Loader = () => (
+  <div className="flex justify-center items-center py-8">
+    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+);
 
 const PatientAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancellingId, setCancellingId] = useState(null);
 
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
   const status = useSelector((state) => state.auth.status);
-
-  console.log(user);
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -49,7 +54,7 @@ const PatientAppointments = () => {
     if (!confirmation) return;
 
     try {
-      setCancelLoading(true);
+      setCancellingId(appointmentId);
       const response = await fetch(
         `${NODE_API_ENDPOINT}/appointments/${appointmentId}/cancel`,
         {
@@ -62,49 +67,46 @@ const PatientAppointments = () => {
       );
 
       if (!response.ok) {
-        setCancelLoading(false);
-
+        setCancellingId(null);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      setCancelLoading(false);
-
-      // Update the state after successfully canceling
+      // Instead of removing the appointment, update its status to "cancelled"
       setAppointments((prevAppointments) =>
-        prevAppointments.filter(
-          (appointment) => appointment._id !== appointmentId
+        prevAppointments.map((appointment) =>
+          appointment._id === appointmentId
+            ? { ...appointment, status: "cancelled" }
+            : appointment
         )
       );
-      alert("Appointment canceled successfully.");
+      alert("Appointment cancelled successfully.");
     } catch (error) {
-      setCancelLoading(false);
-
       console.error("Error canceling appointment:", error);
       alert("An error occurred while canceling the appointment.");
+    } finally {
+      setCancellingId(null);
     }
   };
 
   const isCancelable = (appointmentDate) => {
-    // Get the current date and reset the time to midnight to only compare the date
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
-
-    // Convert the appointment's date to a Date object
     const appointmentDateObj = new Date(appointmentDate);
     appointmentDateObj.setHours(0, 0, 0, 0);
-
-    // If the current date is earlier than the appointment date, return true to show the button
     return currentDate < appointmentDateObj;
   };
 
-  if (!user && status === "loading") return <div>Loading...</div>;
+  if (!user && status === "loading") return <Loader />;
   if (!user && status === "succeeded") {
     navigate("/login");
-    return;
+    return null;
+  }
+  if (loading) {
+    return <Loader />;
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-semibold text-center mb-6">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6">
+      <h1 className="text-2xl sm:text-3xl font-semibold text-center mb-6">
         Your Appointments
       </h1>
 
@@ -113,10 +115,10 @@ const PatientAppointments = () => {
           <p>You have no upcoming appointments.</p>
         </div>
       ) : (
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          {appointments.map((appointment, index) => (
-            <div key={index} className="mb-6 border-b pb-6">
-              <h2 className="text-2xl font-semibold">
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+          {appointments.map((appointment) => (
+            <div key={appointment._id} className="mb-6 border-b pb-6">
+              <h2 className="text-xl sm:text-2xl font-semibold">
                 Dr. {appointment.doctor.user.firstName}{" "}
                 {appointment.doctor.user.lastName} -{" "}
                 {appointment.doctor.specialty}
@@ -139,18 +141,43 @@ const PatientAppointments = () => {
               </p>
               <p className="text-gray-600 text-sm mt-2">
                 <strong>Status:</strong>{" "}
-                {appointment.status === "scheduled" ? "Scheduled" : "cancelled"}
+                {appointment.status === "scheduled" ? "Scheduled" : "Cancelled"}
               </p>
 
-              {/* Show the cancel button only if the current date is earlier than the appointment date */}
               {appointment.status === "scheduled" &&
                 isCancelable(appointment.date) && (
                   <button
-                    disabled={cancelLoading}
-                    className="cursor-pointer mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+                    disabled={cancellingId === appointment._id}
                     onClick={() => handleCancelAppointment(appointment._id)}
+                    className="cursor-pointer mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center justify-center"
                   >
-                    {cancelLoading ? "Cancelling..." : "Cancel Appointment"}
+                    {cancellingId === appointment._id ? (
+                      <>
+                        <svg
+                          className="animate-spin h-5 w-5 mr-2 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                          ></path>
+                        </svg>
+                        Cancelling...
+                      </>
+                    ) : (
+                      "Cancel Appointment"
+                    )}
                   </button>
                 )}
             </div>

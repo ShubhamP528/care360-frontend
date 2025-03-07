@@ -7,12 +7,12 @@ const Footer = () => {
         <p className="text-sm">
           &copy; {new Date().getFullYear()} MyCompany. All rights reserved.
         </p>
-        <div className="mt-2">
-          <a href="#" className="text-white hover:text-gray-300 text-sm mx-2">
+        <div className="mt-2 flex flex-col sm:flex-row items-center justify-center gap-1">
+          <a href="#" className="text-white hover:text-gray-300 text-sm mx-1">
             Privacy Policy
           </a>
-          |
-          <a href="#" className="text-white hover:text-gray-300 text-sm mx-2">
+          <span className="hidden sm:inline">|</span>
+          <a href="#" className="text-white hover:text-gray-300 text-sm mx-1">
             Terms of Service
           </a>
         </div>

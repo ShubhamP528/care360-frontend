@@ -26,7 +26,9 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="text-xl font-bold">MyLogo</div>
+          <Link to={user ? "/dashboard" : "/"}>
+            <div className="text-xl font-bold">Care360</div>
+          </Link>
 
           {/* Mobile Hamburger Icon */}
           <div className="sm:hidden">
